@@ -425,6 +425,7 @@ class game_state():
                 self.white_king_location = (row, col - i)
                 in_check, trash, trash = self.check_for_pins_or_check()
                 if self.board[row][col - i] != "--" or in_check:
+                    self.white_king_location = (row, col)
                     return False
             self.white_king_location = (row, col)
             return True
@@ -439,6 +440,7 @@ class game_state():
                 self.black_king_location = (row, col - i)
                 in_check, trash, trash = self.check_for_pins_or_check()
                 if self.board[row][col - i] != "--" or in_check:
+                    self.black_king_location = (row, col)
                     return False
             self.black_king_location = (row, col)
             return True
@@ -455,6 +457,7 @@ class game_state():
                 self.white_king_location = (row, col + i)
                 in_check, trash, trash = self.check_for_pins_or_check()
                 if self.board[row][col + i] != "--" or in_check:
+                    self.white_king_location = (row, col)
                     return False
             self.white_king_location = (row, col)
             return True
@@ -469,6 +472,7 @@ class game_state():
                 self.black_king_location = (row, col + i)
                 in_check, trash, trash = self.check_for_pins_or_check()
                 if self.board[row][col + i] != "--" or in_check:
+                    self.black_king_location = (row, col)
                     return False
             self.black_king_location = (row, col)
             return True
