@@ -186,15 +186,9 @@ def main():
             valid_move = game_state.get_valid_move()
             move_made = False
             
-            # For checking checkmate or stalemate
-            if len(valid_move) == 0:
-                in_check, trash, trash = game_state.check_for_pins_or_check()
-                if in_check:
-                    winner = "White" if game_state.turn == "b" else "Black"
-                    print("Gameover!", winner, "won!") 
-                else:
-                    print("Stalemate!")
-                game_running = False
+            # For checking endgame
+            game_running = not game_state.checking_endgame(valid_move)
+            print(game_state.move_log[-1].get_chess_notation() + ": " + str(game_state.piece_count))
         
         # Draw the game
         draw_game_state(screen, game_state, selected_square, valid_move)

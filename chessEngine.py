@@ -14,6 +14,18 @@ class game_state():
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
         ]
         
+        # This board is for testing
+        # self.board = [
+        #     ["--", "--", "--", "--", "bK", "--", "--", "--"],
+        #     ["--", "--", "--", "--", "--", "--", "--", "--"],
+        #     ["--", "--", "--", "--", "--", "--", "--", "--"],
+        #     ["--", "--", "--", "--", "--", "--", "--", "--"],
+        #     ["--", "--", "--", "--", "--", "--", "--", "--"],
+        #     ["--", "bB", "--", "--", "--", "--", "--", "--"],
+        #     ["--", "--", "--", "--", "--", "--", "--", "--"],
+        #     ["--", "wB", "--", "--", "wK", "--", "--", "--"]
+        # ]
+        
         # Function list for getting possible move from any piece type
         self.get_move = {
             "Q": self.queen_move,
@@ -53,6 +65,11 @@ class game_state():
         self.white_queen_rook_moved = False
         self.white_king_rook_moved = False
         self.white_king_moved = False
+        
+        # For checking endgame
+        self.move_count_without_capture = 0
+        self.piece_count = 32
+        self.move_count_without_pawn_move = 0
     
     # This function get every valid move
     def get_valid_move(self):
@@ -524,6 +541,93 @@ class game_state():
             self.black_king_rook_moved = True
         
         self.turn = "w" if self.turn == "b" else "b"
+
+    # Checking 50 moves without capture rule
+    def check_50_move_without_capture(self):
+        count = 0
+        for row in self.board:
+            count += len([i for i in row if i != "--"])
+        if self.piece_count > count:
+            self.piece_count = count
+            self.move_count_without_capture = 0
+        else:
+            self.move_count_without_capture += 1
+        if self.move_count_without_capture == 50:
+            return True
+        return False
+    
+    # Checking 50 moves without pawn move
+    def check_50_move_without_pawn_move(self):
+        piece_type = self.move_log[-1].get_chess_notation()[1]
+        if piece_type != "p":
+            self.move_count_without_pawn_move += 1
+        else:
+            self.move_count_without_pawn_move = 0
+        if self.move_count_without_pawn_move == 50:
+            return True
+        return False
+    
+    # Checking repetitive move
+    def check_3_repetitive_move(self):
+        count = 1
+        if len(self.move_log) >= 9: 
+            move_type = self.move_log[-1].get_chess_notation()[:2] + self.move_log[-1].get_chess_notation()[4:]
+            for index in range(-5, -10, -4):
+                move_type_2 = self.move_log[index].get_chess_notation()[:2] + self.move_log[index].get_chess_notation()[4:]
+                if move_type == move_type_2:
+                    count += 1
+        if count == 3:
+            return True
+        return False
+    
+    # Check insufficient piece
+    def checking_insufficient(self):
+        count_white_knight_left = 0
+        count_black_knight_left = 0
+        count_black_cell_bishop = 0
+        count_white_cell_bishop = 0
+        for row in range(len(self.board)):
+            for col in range(len(self.board[row])):
+                if self.board[row][col] == "bN":
+                    count_black_knight_left += 1
+                elif self.board[row][col] == "wN":
+                    count_white_knight_left += 1
+                elif self.board[row][col][1] == "B" and (row + col) % 2 == 0:
+                    count_white_cell_bishop += 1
+                elif self.board[row][col][1] == "B" and (row + col) % 2 == 1:
+                    count_black_cell_bishop += 1
+        if self.piece_count == 3:
+            if count_white_knight_left == 1 or count_black_knight_left == 1 or count_black_cell_bishop == 1 or count_white_cell_bishop == 1:
+                return True
+        if self.piece_count == 4:
+            if count_white_cell_bishop == 2 or count_black_cell_bishop == 2:
+                return True
+        return False
+    
+    # Checking endgame
+    def checking_endgame(self, valid_move_list):
+        if len(valid_move_list) == 0:
+            in_check, trash, trash = self.check_for_pins_or_check()
+            if in_check:
+                winner = "White" if self.turn == "b" else "Black"
+                print("Gameover!", winner, "won!") 
+            else:
+                print("Stalemate!")
+            return True 
+        
+        if self.check_50_move_without_capture() or self.check_50_move_without_pawn_move():
+            print("Draw due to 50-move rule!")
+            return True 
+        
+        if self.check_3_repetitive_move():
+            print("Draw due to 3 repetitive moves!")
+            return True
+        
+        if self.checking_insufficient() or self.piece_count == 2:
+            print("Draw due to insufficient materials!")
+            return True
+        
+        return False
 
 
 # This class to define a move, including (start_row, start_col), (end_row, end_col)      
