@@ -23,7 +23,7 @@ class game_state():
         #     ["--", "--", "--", "--", "--", "--", "--", "--"],
         #     ["--", "bB", "--", "--", "--", "--", "--", "--"],
         #     ["--", "--", "--", "--", "--", "--", "--", "--"],
-        #     ["--", "wB", "--", "--", "wK", "--", "--", "--"]
+        #     ["--", "wR", "--", "--", "wK", "--", "--", "--"]
         # ]
         
         # Function list for getting possible move from any piece type
@@ -526,19 +526,19 @@ class game_state():
         self.board[move.end_row][move.end_col] = move.piece_moved
         self.move_log.append(move)
         piece_type = self.move_log[-1].get_chess_notation()[:2]
-        if piece_type == "bK" and not self.black_king_moved:
+        if self.board[0][4] != "bK" and not self.black_king_moved:
             self.black_king_moved = True
-        if piece_type == "wK" and not self.white_king_moved:
-            self.white_king_moved = True
-        start_col = self.move_log[-1].file_to_col[self.move_log[-1].get_chess_notation()[2]]
-        if piece_type == "wR" and start_col == 0 and not self.white_queen_rook_moved:
-            self.white_queen_rook_moved = True
-        if piece_type == "wR" and start_col == 7 and not self.white_king_rook_moved:
-            self.white_king_rook_moved = True
-        if piece_type == "bR" and start_col == 0 and not self.black_queen_rook_moved:
-            self.black_queen_rook_moved = True
-        if piece_type == "bR" and start_col == 7 and not self.black_king_rook_moved:
+        if self.board[7][4] != "wK" and not self.black_king_moved:
+            self.black_king_moved = True
+        if self.board[0][7] != "bR" and not self.black_king_rook_moved:
             self.black_king_rook_moved = True
+        if self.board[0][0] != "bR" and not self.black_queen_rook_moved:
+            self.black_queen_rook_moved = True
+        if self.board[0][7] != "wR" and not self.white_king_rook_moved:
+            self.white_king_rook_moved = True
+        if self.board[0][0] != "wR" and not self.white_queen_rook_moved:
+            self.white_queen_rook_moved = True
+
         
         self.turn = "w" if self.turn == "b" else "b"
 
@@ -615,7 +615,10 @@ class game_state():
                 print("Stalemate!")
             return True 
         
-        if self.check_50_move_without_capture() and self.check_50_move_without_pawn_move():
+        check1 = self.check_50_move_without_capture() 
+        check2 = self.check_50_move_without_pawn_move()
+        
+        if check1 and check2:
             print("Draw due to 50-move rule!")
             return True 
         
