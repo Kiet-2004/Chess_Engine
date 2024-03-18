@@ -615,7 +615,7 @@ class game_state():
                 print("Stalemate!")
             return True 
         
-        if self.check_50_move_without_capture() or self.check_50_move_without_pawn_move():
+        if self.check_50_move_without_capture() and self.check_50_move_without_pawn_move():
             print("Draw due to 50-move rule!")
             return True 
         
