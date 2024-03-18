@@ -552,7 +552,7 @@ class game_state():
             self.move_count_without_capture = 0
         else:
             self.move_count_without_capture += 1
-        if self.move_count_without_capture == 50:
+        if self.move_count_without_capture == 100:
             return True
         return False
     
@@ -563,7 +563,7 @@ class game_state():
             self.move_count_without_pawn_move += 1
         else:
             self.move_count_without_pawn_move = 0
-        if self.move_count_without_pawn_move == 50:
+        if self.move_count_without_pawn_move == 100:
             return True
         return False
     
