@@ -571,9 +571,9 @@ class game_state():
     def check_3_repetitive_move(self):
         count = 1
         if len(self.move_log) >= 9: 
-            move_type = self.move_log[-1].get_chess_notation()[:2] + self.move_log[-1].get_chess_notation()[4:]
+            move_type = self.move_log[-1].get_chess_notation()
             for index in range(-5, -10, -4):
-                move_type_2 = self.move_log[index].get_chess_notation()[:2] + self.move_log[index].get_chess_notation()[4:]
+                move_type_2 = self.move_log[index].get_chess_notation()
                 if move_type == move_type_2:
                     count += 1
         if count == 3:
