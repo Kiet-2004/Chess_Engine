@@ -16,14 +16,14 @@ class game_state():
         
         # This board is for testing
         # self.board = [
-        #     ["--", "--", "--", "--", "bK", "--", "--", "--"],
         #     ["--", "--", "--", "--", "--", "--", "--", "--"],
+        #     ["--", "--", "bp", "--", "--", "--", "--", "--"],
         #     ["--", "--", "--", "--", "--", "--", "--", "--"],
+        #     ["wK", "wp", "--", "--", "--", "--", "--", "bR"],
+        #     ["wR", "--", "--", "--", "bp", "--", "bp", "bK"],
         #     ["--", "--", "--", "--", "--", "--", "--", "--"],
-        #     ["--", "--", "--", "--", "--", "--", "--", "--"],
-        #     ["--", "bB", "--", "--", "--", "--", "--", "--"],
-        #     ["--", "--", "--", "--", "--", "--", "--", "--"],
-        #     ["--", "wR", "--", "--", "wK", "--", "--", "--"]
+        #     ["--", "--", "--", "--", "--", "wp", "--", "--"],
+        #     ["--", "--", "--", "--", "--", "--", "--", "--"]
         # ]
         
         # Function list for getting possible move from any piece type
@@ -77,7 +77,7 @@ class game_state():
         moves = []
         
         # To check checking, pinning
-        self.in_check, self.pins, self.checks = self.check_for_pins_or_check()
+        self.in_check, self.pins, self.checks = self.check_for_pins_or_check(self.board)
         
         # Get the king location
         if self.turn == "w":
@@ -163,9 +163,15 @@ class game_state():
                     if self.board[row - 1][col - 1][0] == 'b' or (self.en_passant[0] and (row - 1, col - 1) == self.en_passant[1]):
                         if not piece_pinned or pin_direction == (-1, -1):
                             moves.append(Move((row, col), (row - 1, col - 1), self.board))
+                    if self.en_passant[0] and (row - 1, col - 1) == self.en_passant[1]:
+                        if self.is_legal_en_passant_move(row, col, row, col - 1):
+                            moves.append(Move((row, col), (row - 1, col - 1), self.board))
                 if col + 1 < len(self.board[row]):
-                    if self.board[row - 1][col + 1][0] == 'b' or (self.en_passant[0] and (row - 1, col + 1) == self.en_passant[1]):
+                    if self.board[row - 1][col + 1][0] == 'b':
                         if not piece_pinned or pin_direction == (-1, 1):
+                            moves.append(Move((row, col), (row - 1, col + 1), self.board))
+                    if self.en_passant[0] and (row - 1, col + 1) == self.en_passant[1]:
+                        if self.is_legal_en_passant_move(row, col, row, col + 1):
                             moves.append(Move((row, col), (row - 1, col + 1), self.board))
                     
         elif self.turn == "b":
@@ -177,11 +183,17 @@ class game_state():
                             moves.append(Move((row, col), (row + 2, col), self.board))
                 if col - 1 >= 0:
                     if not piece_pinned or pin_direction == (1, -1):
-                        if self.board[row + 1][col - 1][0] == 'w' or (self.en_passant[0] and (row + 1, col - 1) == self.en_passant[1]):
+                        if self.board[row + 1][col - 1][0] == 'w':
+                            moves.append(Move((row, col), (row + 1, col - 1), self.board))
+                    if self.en_passant[0] and (row + 1, col - 1) == self.en_passant[1]:
+                        if self.is_legal_en_passant_move(row, col, row, col - 1):
                             moves.append(Move((row, col), (row + 1, col - 1), self.board))
                 if col + 1 < len(self.board[row]):
                     if not piece_pinned or pin_direction == (1, 1):
-                        if self.board[row + 1][col + 1][0] == 'w' or (self.en_passant[0] and (row + 1, col + 1) == self.en_passant[1]):
+                        if self.board[row + 1][col + 1][0] == 'w':
+                            moves.append(Move((row, col), (row + 1, col + 1), self.board))
+                    if self.en_passant[0] and (row + 1, col + 1) == self.en_passant[1]:
+                        if self.is_legal_en_passant_move(row, col, row, col + 1):
                             moves.append(Move((row, col), (row + 1, col + 1), self.board))
     
     # Get every rook possible move
@@ -283,7 +295,7 @@ class game_state():
                         self.white_king_location = (end_row, end_col)
                     else: 
                         self.black_king_location = (end_row, end_col)
-                    in_check, pins, checks = self.check_for_pins_or_check()
+                    in_check, pins, checks = self.check_for_pins_or_check(self.board)
                     if not in_check:
                         moves.append(Move((row, col), (end_row, end_col), self.board))
                     if ally == "w":
@@ -317,7 +329,7 @@ class game_state():
         """
     
     # Checking if the king is checked or other pieces are pinned or not
-    def check_for_pins_or_check(self):
+    def check_for_pins_or_check(self, board):
         pins = []
         checks = []
         in_check = False
@@ -341,7 +353,7 @@ class game_state():
                 end_row = start_row + d[0] * j
                 end_col = start_col + d[1] * j
                 if 0 <= end_row and end_row < 8 and 0 <= end_col and end_col < 8:
-                    end_piece = self.board[end_row][end_col]
+                    end_piece = board[end_row][end_col]
                     if end_piece[0] == ally and end_piece[1] != "K":
                         if possible_pins == ():
                             possible_pins = (end_row, end_col, d[0], d[1])
@@ -370,7 +382,7 @@ class game_state():
             end_row = start_row + d[0]
             end_col = start_col + d[1]
             if 0 <= end_row and end_row < 8 and 0 <= end_col and end_col < 8:
-                end_piece = self.board[end_row][end_col]
+                end_piece = board[end_row][end_col]
                 if end_piece[0] == opponent and end_piece[1] == "N":
                     in_check = True
                     checks.append((end_row, end_col, d[0], d[1]))
@@ -380,14 +392,27 @@ class game_state():
     # Check if we can make EN PASSANT move or not
     def check_en_passant(self):
         # If the previous move is pawn and they make 2-cell move, then it en passant
-        piece_type = self.move_log[-1].get_chess_notation()[1]
+        piece_type = self.move_log[-1].get_chess_notation()[:2]
         start_row = self.move_log[-1].rank_to_row[self.move_log[-1].get_chess_notation()[3]]
         start_col = self.move_log[-1].file_to_col[self.move_log[-1].get_chess_notation()[2]]
         end_row = self.move_log[-1].rank_to_row[self.move_log[-1].get_chess_notation()[5]]
         end_col = self.move_log[-1].file_to_col[self.move_log[-1].get_chess_notation()[4]]
-        if piece_type == "p" and ((start_row == 6 and end_row == 4) or (start_row == 1 and end_row == 3)):
+        if piece_type[1] == "p" and ((start_row == 6 and end_row == 4) or (start_row == 1 and end_row == 3)):
             # Store the en passant captured location, captured pawn location
             self.en_passant = [True, ((start_row + end_row) // 2, start_col), (end_row, end_col)]
+    
+    def is_legal_en_passant_move(self, row_1, col_1, row_2, col_2):
+        temp_board = [[i for i in j] for j in self.board]
+        temp_board[row_1][col_1] = '--'
+        temp_board[row_2][col_2] = '--'
+        if self.turn == "w":
+            temp_board[row_1 - 1][col_2] = self.turn + "p"
+        else:
+            temp_board[row_1 + 1][col_2] = self.turn + "p"
+        check, trash, trash = self.check_for_pins_or_check(temp_board)
+        if check:
+            return False
+        return True
     
     def en_passant_move(self):
         if self.en_passant[0]:
@@ -435,12 +460,12 @@ class game_state():
         if self.turn == "w":
             if self.white_king_moved or self.white_queen_rook_moved:
                 return False
-            in_check, trash, trash = self.check_for_pins_or_check()
+            in_check, trash, trash = self.check_for_pins_or_check(self.board)
             if in_check:
                 return False
             for i in range(1, 3):
                 self.white_king_location = (row, col - i)
-                in_check, trash, trash = self.check_for_pins_or_check()
+                in_check, trash, trash = self.check_for_pins_or_check(self.board)
                 if self.board[row][col - i] != "--" or in_check:
                     self.white_king_location = (row, col)
                     return False
@@ -450,12 +475,12 @@ class game_state():
         if self.turn == "b":
             if self.black_king_moved or self.black_queen_rook_moved:
                 return False
-            in_check, trash, trash = self.check_for_pins_or_check()
+            in_check, trash, trash = self.check_for_pins_or_check(self.board)
             if in_check:
                 return False
             for i in range(1, 3):
                 self.black_king_location = (row, col - i)
-                in_check, trash, trash = self.check_for_pins_or_check()
+                in_check, trash, trash = self.check_for_pins_or_check(self.board)
                 if self.board[row][col - i] != "--" or in_check:
                     self.black_king_location = (row, col)
                     return False
@@ -467,12 +492,12 @@ class game_state():
         if self.turn == "w":
             if self.white_king_moved or self.white_king_rook_moved:
                 return False
-            in_check, trash, trash = self.check_for_pins_or_check()
+            in_check, trash, trash = self.check_for_pins_or_check(self.board)
             if in_check:
                 return False
             for i in range(1, 3):
                 self.white_king_location = (row, col + i)
-                in_check, trash, trash = self.check_for_pins_or_check()
+                in_check, trash, trash = self.check_for_pins_or_check(self.board)
                 if self.board[row][col + i] != "--" or in_check:
                     self.white_king_location = (row, col)
                     return False
@@ -482,12 +507,12 @@ class game_state():
         if self.turn == "b":
             if self.black_king_moved or self.black_king_rook_moved:
                 return False
-            in_check, trash, trash = self.check_for_pins_or_check()
+            in_check, trash, trash = self.check_for_pins_or_check(self.board)
             if in_check:
                 return False
             for i in range(1, 3):
                 self.black_king_location = (row, col + i)
-                in_check, trash, trash = self.check_for_pins_or_check()
+                in_check, trash, trash = self.check_for_pins_or_check(self.board)
                 if self.board[row][col + i] != "--" or in_check:
                     self.black_king_location = (row, col)
                     return False
@@ -607,7 +632,7 @@ class game_state():
     # Checking endgame
     def checking_endgame(self, valid_move_list):
         if len(valid_move_list) == 0:
-            in_check, trash, trash = self.check_for_pins_or_check()
+            in_check, trash, trash = self.check_for_pins_or_check(self.board)
             if in_check:
                 winner = "White" if self.turn == "b" else "Black"
                 print("Gameover!", winner, "won!") 
