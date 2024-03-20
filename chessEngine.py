@@ -554,14 +554,14 @@ class game_state():
         if self.board[0][4] != "bK" and not self.black_king_moved:
             self.black_king_moved = True
         if self.board[7][4] != "wK" and not self.black_king_moved:
-            self.black_king_moved = True
+            self.white_king_moved = True
         if self.board[0][7] != "bR" and not self.black_king_rook_moved:
             self.black_king_rook_moved = True
         if self.board[0][0] != "bR" and not self.black_queen_rook_moved:
             self.black_queen_rook_moved = True
-        if self.board[0][7] != "wR" and not self.white_king_rook_moved:
+        if self.board[7][7] != "wR" and not self.white_king_rook_moved:
             self.white_king_rook_moved = True
-        if self.board[0][0] != "wR" and not self.white_queen_rook_moved:
+        if self.board[7][0] != "wR" and not self.white_queen_rook_moved:
             self.white_queen_rook_moved = True
 
         
