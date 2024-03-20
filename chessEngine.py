@@ -553,7 +553,7 @@ class game_state():
         piece_type = self.move_log[-1].get_chess_notation()[:2]
         if self.board[0][4] != "bK" and not self.black_king_moved:
             self.black_king_moved = True
-        if self.board[7][4] != "wK" and not self.black_king_moved:
+        if self.board[7][4] != "wK" and not self.white_king_moved:
             self.white_king_moved = True
         if self.board[0][7] != "bR" and not self.black_king_rook_moved:
             self.black_king_rook_moved = True
